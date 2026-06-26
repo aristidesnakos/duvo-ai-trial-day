@@ -5,7 +5,7 @@
 
 ## Headline
 
-**Daily Basket could not answer Mark's question — "how much are we recovering vs. how much is owed?" Now it can: €6,203 owed, €0 recovered, a 0% recovery rate, and €4,628 in missed money the old process never logged — plus a €450 double-count caught before it reached a supplier.**
+**Daily Basket could not answer Mark's question — "how much are we recovering vs. how much is owed?" Now it can: €6,203 owed, €0 recovered, a 0% recovery rate, and €4,628 in missed money the old process never logged — plus a €450 double-count caught before it reached a supplier. And it works the other direction too: €29,200 of duplicate supplier billing blocked before AP paid it (prevent loss). Total money protected = €6,203 recoverable + €29,200 prevented.**
 
 > **Live on Duvo (Production).** This is no longer just a local engine — the agent is deployed and runnable on the Duvo platform: **"Supplier Reconciliation & Claims Co-Pilot"** (agent `eb165d7e-c8aa-43d3-84ff-055fbcc961e3`, build/rev 1 `d928916c-051b-4f2f-9792-b9a25fdb2760`, `claude-sonnet-4-6[1m]`, Agent Memory on). It was provisioned via `duvo agents create` with the AOP plus a knowledge-base upload of the 6 Q1 inputs (the 5 CSVs + `email_thread.pdf`), and reconciles the **same validated Q1 numbers below** (€6,203 owed · €0 recovered · €4,628 missed · €450 over-claim). Commands, live IDs and scope are in [`aop/DEPLOYMENT.md`](aop/DEPLOYMENT.md); the captured run output is in [`aop/run-result.md`](aop/run-result.md).
 
@@ -43,6 +43,24 @@
 > **Annualized run-rate:** Q1 €6,203 × 4 ≈ **€24,812/yr** (seasonality caveat — Q1 only; rebate/promo recur quarterly, discrepancies vary. Confirm with Finance before quoting externally.)
 >
 > **One claim carries a caveat (medium confidence): the €2,000 Sunrise promo.** Its contract runs `2025-03-01 → 2026-02-28` — it lapses two-thirds into Q1. The agent claims the full quarter's promo but flags that the contract was not active for the whole period: **pro-rate or confirm the promo rule before quoting it to a supplier.** Excluding it, high-confidence missed money is **€2,628** (Riverside €1,080 + Northgate €1,548). This is the honest read — the agent surfaces *and qualifies* the number rather than overstating it.
+
+---
+
+## Prevent loss — €29,200 duplicate billing blocked (do-not-pay)
+
+Recovering money owed *to* us is one direction; the agent also runs the other — **catching money about to leave us**. Three new supplier invoices re-bill POs that were already received once (one GRN) and invoiced once. That is **double-billing**: money Daily Basket would lose if AP paid them. The agent flags each as **"DO NOT PAY — duplicate invoice"** (Tier-1 alert to AP). Crucially, it does **not** raise them as supplier credit claims — that's the wrong direction — and it does **not** let them pollute the recovery numbers above.
+
+| New invoice | PO | Already invoiced | Duplicate says | Exposure |
+|---|---|---|---|---|
+| INV-2032 Riverside | PO-1019 | INV-2019 1800 @ €9.00 = €16,200 | identical | €16,200 double-bill |
+| INV-2033 Greenfield | PO-1017 | INV-2017 1200 @ €2.50 = €3,000 | identical | €3,000 double-bill |
+| INV-2031 Northgate | PO-1022 | INV-2022 800 @ €12.00 = €9,600 | 800 @ €12.50 = €10,000 | €10,000 duplicate + €400 overcharge |
+
+> **Total duplicate billing blocked = €29,200** (prevent-loss). The discriminator vs. a real partial-delivery second invoice is **count the GRNs**: a 2nd invoice on a PO with only **one** goods receipt is a double-bill, not a legitimate second shipment.
+>
+> **Dangling-reference guard:** tracker row **CLM-007** cites invoice **INV-2099**, which does not exist anywhere in our data → flagged **"reference not found"** rather than acted on. Verify before chasing.
+>
+> **Total money protected = €6,203 recoverable + €29,200 prevented loss.** The two categories stay separate and never net against each other.
 
 ---
 

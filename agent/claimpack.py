@@ -43,6 +43,13 @@ def period_rollup(reconciled: List[ReconciledClaim], data) -> dict:
     over_claim_risk = round(sum(-r.delta_vs_tracker_eur for r in reconciled
                                 if r.bucket == "over-claimed" and r.delta_vs_tracker_eur < 0), 2)
 
+    # Prevent-loss: duplicate invoices blocked before payment. This is DISTINCT
+    # from recovery — it is money kept in the bank, not clawed back. Kept as its
+    # own line so owed/recovered/missed are never polluted by it.
+    duplicate_blocked = [r for r in reconciled if r.bucket == "do-not-pay"]
+    duplicate_billing_blocked = round(
+        sum(r.claim.eur_amount for r in duplicate_blocked), 2)
+
     return {
         "period": data.period,
         "eur_owed_total": owed,
@@ -52,6 +59,8 @@ def period_rollup(reconciled: List[ReconciledClaim], data) -> dict:
         "logged_correct_eur": by_bucket["logged-correct"],
         "over_claimed_eur": by_bucket["over-claimed"],
         "over_claim_risk_eur": over_claim_risk,
+        "duplicate_billing_blocked_eur": duplicate_billing_blocked,
+        "n_duplicate_invoices": len(duplicate_blocked),
         "annualized_run_rate_eur": round(owed * 4, 2),
         "n_claimable": len(claimable),
         "n_missed": sum(1 for r in claimable if r.bucket == "missed"),

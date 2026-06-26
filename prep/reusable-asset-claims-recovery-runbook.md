@@ -183,6 +183,8 @@ Walk this list on every deployment — each one has sunk a real reconciliation:
 - [ ] **Multiple invoices per PO.** Aggregate before the price/qty compare.
 - [ ] **Period boundaries.** Which date defines the period — order, receipt, or invoice? Exclude out-of-period rows; confirm the period is *closed* before treating it as claimable.
 - [ ] **Duplicate tracker rows.** Same claim logged twice "in a rush" → over-claim risk. The idempotency key catches this on reconcile.
+- [ ] **Duplicate invoice (double-bill).** A 2nd invoice on a PO that has **no 2nd goods receipt** is the supplier billing twice for one delivery, not a legitimate second shipment. **Discriminator: count the GRNs** — one GRN + two invoices = double-bill (or a partial re-bill if the prices differ). This is *prevent-loss*, the opposite direction from a recovery claim: flag **DO-NOT-PAY**, route to **AP**, and **never** raise it as a supplier credit claim or let it touch the recovery total.
+- [ ] **Dangling reference.** A tracker/claim row cites an invoice or PO **not present in our data** → flag **"reference not found"** and verify before acting; do not chase or pay against an id you can't see in the source.
 - [ ] **Evidence sufficiency.** No GR → can't substantiate a short/damage claim; the supplier may be right. Route to not-substantiable, never fabricate.
 - [ ] **"Damaged" coding.** A flag? a separate qty column? free text? Confirm the vocabulary before trusting it.
 - [ ] **Rebate basis.** Gross vs. net, per-period, tiered (flat vs. marginal)? Get one worked example from the customer.

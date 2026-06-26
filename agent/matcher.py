@@ -66,8 +66,26 @@ def three_way_match(data: PeriodData) -> List[DerivedClaim]:
             ))
             continue
 
-        # Multiple GRNs/invoices per PO (partial deliveries) => aggregate qty and
-        # lower confidence rather than silently using only the first row.
+        # --- Duplicate / double-bill split. ---
+        # A PO is settled by ONE goods receipt + ONE invoice. If there are MORE
+        # invoices than goods receipts, the excess invoices are duplicates (a
+        # second bill not backed by a second delivery). They must be flagged
+        # DO-NOT-PAY, never summed into the delivered/invoiced qty for the normal
+        # short/price checks. The earliest invoices (one per GRN) are the real
+        # ones; later ones are the duplicates. Order is date-stable. We split
+        # FIRST so the clean 1-GRN/1-invoice primary stays high-confidence.
+        invs_sorted = sorted(
+            invs_matched,
+            key=lambda i: (config.parse_date(i.invoice_date) or config.parse_date("9999-12-31"),
+                           i.invoice_id))
+        n_grn = len(grns_matched)
+        primary_invs = invs_sorted[:n_grn] if n_grn else invs_sorted[:1]
+        duplicate_invs = invs_sorted[len(primary_invs):]
+        invs_matched = primary_invs  # everything below reconciles on the primaries only
+
+        # Multiple GRNs/invoices per PO (genuine partial deliveries) => aggregate
+        # qty and lower confidence. Duplicates are already split out above, so a
+        # PO with one GRN + one real invoice + duplicates stays high-confidence.
         multi = len(grns_matched) > 1 or len(invs_matched) > 1
         base_conf = "medium" if multi else "high"
 
@@ -86,6 +104,31 @@ def three_way_match(data: PeriodData) -> List[DerivedClaim]:
         normalized = (po.uom.lower() == "case" and upc > 1)
         po_qty, po_price, po_note = normalize_uom(po.qty_ordered, po.unit_price_eur, po.uom, upc)
         grn_qty = sum(normalize_uom(g.qty_received, 0.0, g.uom, upc)[0] for g in grns_matched)
+
+        # Emit one DO-NOT-PAY finding per duplicate invoice (full total at risk).
+        for dup in duplicate_invs:
+            original = primary_invs[0] if primary_invs else None
+            dup_amount = round(dup.invoice_total_eur, 2)
+            orig_id = original.invoice_id if original else "the original invoice"
+            line = (f"DUPLICATE of {orig_id} on {po.po_id} "
+                    f"({n_grn} GRN, {len(invs_sorted)} invoices) — "
+                    f"{config.eur(dup_amount)} double-bill; withhold payment.")
+            # Embedded overcharge: duplicate billed above the agreed PO price.
+            if dup.unit_price_eur > po.unit_price_eur + 1e-9:
+                delta = round((dup.unit_price_eur - po.unit_price_eur) * dup.qty_invoiced, 2)
+                line += (f" Also overcharged: {config.eur(dup.unit_price_eur)}/{dup.uom} vs "
+                         f"agreed {config.eur(po.unit_price_eur)}/{dup.uom} = "
+                         f"{config.eur(dup.unit_price_eur - po.unit_price_eur)} × {dup.qty_invoiced:g} "
+                         f"= {config.eur(delta)} price delta vs the original.")
+            claims.append(DerivedClaim(
+                po_id=po.po_id, supplier_id=po.supplier_id, supplier_name=po.supplier_name,
+                claim_type="duplicate_invoice", eur_amount=dup_amount,
+                line_math=line,
+                evidence={"po": po.po_id, "duplicate_invoice": dup.invoice_id,
+                          "original_invoice": orig_id, "n_grn": n_grn,
+                          "n_invoices": len(invs_sorted)},
+                uom_normalized=normalized, confidence="high", period=data.period,
+            ))
 
         if invs_matched:
             inv = invs_matched[0]  # representative for unit price

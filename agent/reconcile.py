@@ -61,6 +61,16 @@ def reconcile_against_tracker(derived: List[DerivedClaim],
                 claimable=False,
                 not_claimable_reason="No goods-receipt evidence — cannot substantiate."))
             continue
+        # Duplicate / double-bill: NOT a recoverable claim — it is a prevent-loss
+        # flag. Route to a distinct "do-not-pay" bucket, never claimable.
+        if claim.claim_type == "duplicate_invoice":
+            reconciled.append(ReconciledClaim(
+                claim=claim, bucket="do-not-pay", tracker_claim_id=None,
+                tracker_status=None, delta_vs_tracker_eur=0.0, duplicate_of=None,
+                claimable=False,
+                not_claimable_reason="Duplicate invoice — withhold payment (DO-NOT-PAY); "
+                                     "this prevents a double-payment, it is not a recoverable claim."))
+            continue
         if claim.claim_type == "rebate_below_threshold":
             reconciled.append(ReconciledClaim(
                 claim=claim, bucket="not-claimable", tracker_claim_id=None,
@@ -130,4 +140,26 @@ def orphan_tracker_rows(derived: List[DerivedClaim], data: PeriodData):
             orphans.append((t, "blank amount — placeholder / not a substantiated claim"))
         elif not hit:
             orphans.append((t, "no matching derived claim — investigate or close"))
+
+    # --- Dangling-reference guard. ---
+    # A tracker row may cite a po_ref/invoice_ref that does not exist in the
+    # loaded source data at all (e.g. CLM-007 → INV-2099). Flag every such row
+    # (across in-period AND excluded rows) so a stale/typo'd reference can't be
+    # acted on. Verified against the FULL loaded set, not just the matched ones.
+    known_pos = {p.po_id for p in data.purchase_orders}
+    known_invs = {i.invoice_id for i in data.invoices}
+    flagged = {id(t) for t, _ in orphans}
+    for t in list(data.tracker) + list(data.excluded_tracker):
+        if id(t) in flagged:
+            continue
+        bad_inv = t.invoice_ref and t.invoice_ref not in known_invs
+        bad_po = t.po_ref and t.po_ref not in known_pos
+        if bad_inv or bad_po:
+            missing = []
+            if bad_inv:
+                missing.append(f"invoice_ref {t.invoice_ref}")
+            if bad_po:
+                missing.append(f"po_ref {t.po_ref}")
+            orphans.append((t, f"reference not found ({', '.join(missing)}) — verify"))
+            flagged.add(id(t))
     return orphans

@@ -24,7 +24,7 @@ from .observability import make_run_id, write_records
 from .reconcile import orphan_tracker_rows, reconcile_against_tracker
 from . import submit as submit_mod
 
-BUCKET_ORDER = ["missed", "logged-correct", "over-claimed", "not-claimable"]
+BUCKET_ORDER = ["missed", "logged-correct", "over-claimed", "do-not-pay", "not-claimable"]
 
 
 def analyze(period: str = config.PERIOD_LABEL):
@@ -51,6 +51,9 @@ def _print_report(data, run_id, reconciled, orphans, rollup):
     print(f"   ── over-claimed (real, but logged 2x) : {e(rollup['over_claimed_eur'])}")
     print(f"   over-claim RISK (would double-pay)    : {e(rollup['over_claim_risk_eur'])}")
     print(f"   annualized run-rate (×4, seasonality) : {e(rollup['annualized_run_rate_eur'])}")
+    print(f"\n   PREVENT-LOSS (separate from recovery):")
+    print(f"   ── duplicate billing BLOCKED (do-not-pay): {e(rollup['duplicate_billing_blocked_eur'])}  "
+          f"({rollup['n_duplicate_invoices']} duplicate invoices)")
 
     for bucket in BUCKET_ORDER:
         rows = [r for r in reconciled if r.bucket == bucket]

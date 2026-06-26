@@ -95,7 +95,7 @@ class DerivedClaim:
     po_id: Optional[str]
     supplier_id: str
     supplier_name: str
-    claim_type: str             # short_delivery | damage | price_gap | rebate | promo
+    claim_type: str             # short_delivery | damage | price_gap | rebate | promo | duplicate_invoice
     eur_amount: float
     line_math: str              # human-readable arithmetic a buyer can re-check
     evidence: dict              # the source rows backing this claim
@@ -112,7 +112,7 @@ class DerivedClaim:
 @dataclass
 class ReconciledClaim:
     claim: DerivedClaim
-    bucket: str                 # missed | logged-correct | over-claimed | not-claimable
+    bucket: str                 # missed | logged-correct | over-claimed | do-not-pay | not-claimable
     tracker_claim_id: Optional[str]
     tracker_status: Optional[str]
     delta_vs_tracker_eur: float

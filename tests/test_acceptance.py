@@ -141,6 +141,67 @@ def test_riverside_damage_high_confidence():
     assert r.claim.confidence == "high"
 
 
+def test_duplicate_invoices_flagged_do_not_pay():
+    """The 3 duplicate invoices are flagged do-not-pay totaling €29,200."""
+    _, _, reconciled, _, rollup = _setup()
+    dupes = [r for r in reconciled if r.claim.claim_type == "duplicate_invoice"]
+    assert len(dupes) == 3, f"expected 3 duplicates, got {len(dupes)}"
+    assert all(r.bucket == "do-not-pay" for r in dupes)
+    assert round(sum(r.claim.eur_amount for r in dupes), 2) == 29200.00
+    assert rollup["duplicate_billing_blocked_eur"] == 29200.00
+    assert rollup["n_duplicate_invoices"] == 3
+    # Individual at-risk totals.
+    by_amt = sorted(r.claim.eur_amount for r in dupes)
+    assert by_amt == [3000.00, 10000.00, 16200.00]
+
+
+def test_duplicate_invoices_not_claimable():
+    """None of the duplicates appear as claimable/recoverable claims."""
+    _, _, reconciled, _, rollup = _setup()
+    dupes = [r for r in reconciled if r.claim.claim_type == "duplicate_invoice"]
+    assert all(not r.claimable for r in dupes)
+    # They must not leak into the owed/missed/recovery totals.
+    assert rollup["eur_owed_total"] == 6203.00
+    assert rollup["missed_eur"] == 4628.00
+    assert rollup["over_claimed_eur"] == 450.00
+    # No claimable claim should carry the duplicate type.
+    claimable = [r for r in reconciled if r.claimable]
+    assert all(r.claim.claim_type != "duplicate_invoice" for r in claimable)
+
+
+def test_duplicate_does_not_inflate_three_way_match():
+    """The 2nd invoice on PO-1019/PO-1017/PO-1022 must NOT create short/price gaps."""
+    _, _, reconciled, _, _ = _setup()
+    # Riverside PO-1019 and Greenfield PO-1017 had clean deliveries; the only
+    # finding tied to those POs should be the duplicate, not a short/price gap.
+    for po in ("PO-1019", "PO-1017"):
+        polluting = [r for r in reconciled
+                     if r.claim.po_id == po
+                     and r.claim.claim_type in ("short_delivery", "price_gap")]
+        assert polluting == [], f"{po} produced a spurious claim from the duplicate"
+
+
+def test_inv2031_carries_overcharge_note():
+    """INV-2031 duplicate names both the €10,000 do-not-pay and the €400 price delta."""
+    _, _, reconciled, _, _ = _setup()
+    nm = _by_supplier(reconciled, "Northgate", "duplicate_invoice")
+    assert len(nm) == 1
+    r = nm[0]
+    assert r.claim.eur_amount == 10000.00
+    assert "INV-2022" in r.claim.line_math      # names the original
+    assert "€400.00" in r.claim.line_math       # the embedded overcharge
+    assert "€12.50" in r.claim.line_math and "€12.00" in r.claim.line_math
+
+
+def test_inv2099_dangling_reference_flagged():
+    """CLM-007 cites INV-2099 (not in invoices.csv) → flagged 'reference not found'."""
+    _, _, _, orphans, _ = _setup()
+    hits = [(t, reason) for t, reason in orphans
+            if t.claim_id == "CLM-007" and "reference not found" in reason]
+    assert hits, "INV-2099 dangling reference was not flagged"
+    assert "INV-2099" in hits[0][1]
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     passed = 0
