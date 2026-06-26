@@ -1,5 +1,12 @@
 # Duvo Agent Run Result — Supplier Reconciliation & Claims Co-Pilot
 
+> **⚠️ SUPERSEDED — this records an early, failed approach, kept for the honest debugging trail.**
+> This run used the knowledge-base-file upload (`config.data.files`), which **did not mount the data
+> in the run sandbox**, so the agent couldn't read the CSVs and produced no reconciliation. The fix
+> was to move the data into a **Google Sheets** workbook. The working **two-agent closed loop** then
+> recovered **€5,536 of €6,203 owed (0% → 89.2%)** — see [`DEPLOYMENT.md`](./DEPLOYMENT.md) (run
+> record) and [`../PROOF-PACK.md`](../PROOF-PACK.md). Read those, not the "€0 / not produced" below.
+
 ## Run metadata
 
 | Field | Value |
