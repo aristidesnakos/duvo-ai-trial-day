@@ -7,6 +7,8 @@
 
 **Daily Basket could not answer Mark's question — "how much are we recovering vs. how much is owed?" Now it can: €6,203 owed, €0 recovered, a 0% recovery rate, and €4,628 in missed money the old process never logged — plus a €450 double-count caught before it reached a supplier.**
 
+> **Live on Duvo (Production).** This is no longer just a local engine — the agent is deployed and runnable on the Duvo platform: **"Supplier Reconciliation & Claims Co-Pilot"** (agent `eb165d7e-c8aa-43d3-84ff-055fbcc961e3`, build/rev 1 `d928916c-051b-4f2f-9792-b9a25fdb2760`, `claude-sonnet-4-6[1m]`, Agent Memory on). It was provisioned via `duvo agents create` with the AOP plus a knowledge-base upload of the 6 Q1 inputs (the 5 CSVs + `email_thread.pdf`), and reconciles the **same validated Q1 numbers below** (€6,203 owed · €0 recovered · €4,628 missed · €450 over-claim). Commands, live IDs and scope are in [`aop/DEPLOYMENT.md`](aop/DEPLOYMENT.md); the captured run output is in [`aop/run-result.md`](aop/run-result.md).
+
 ---
 
 ## BEFORE — the state we found
@@ -20,7 +22,7 @@
 
 - **€ owed is computed from source.** Derives the claims that *should* exist from PO ↔ Goods Receipt ↔ Invoice + contracts, independent of the spreadsheet: **€6,203** of justified Q1 claims.
 - **Recovery rate, finally answerable.** € recovered ÷ € owed = **0%** (nothing logged in Q1 has been recovered yet), split **missed / logged-correct / over-claimed**, each defensible by transparent line-math.
-- **Missed money surfaced.** **€4,628** the old process never logged — Riverside damaged goods, the Northgate rebate, and Sunrise promo funding.
+- **Missed money surfaced.** **€4,628** the old process never logged — Riverside damaged goods (€1,080), the Northgate rebate (€1,548), and Sunrise promo funding (€2,000). The first two are high-confidence; the promo carries one caveat (see below).
 - **Runs without Jenny.** End-to-end derivation + reconciliation + claim-pack runs whether or not she is in. Key-person risk eliminated.
 
 ---
@@ -39,6 +41,8 @@
 | Tracker hygiene | 8 rows, 3 real | 3 placeholder rows + 1 Q4 row + 1 duplicate flagged |
 
 > **Annualized run-rate:** Q1 €6,203 × 4 ≈ **€24,812/yr** (seasonality caveat — Q1 only; rebate/promo recur quarterly, discrepancies vary. Confirm with Finance before quoting externally.)
+>
+> **One claim carries a caveat (medium confidence): the €2,000 Sunrise promo.** Its contract runs `2025-03-01 → 2026-02-28` — it lapses two-thirds into Q1. The agent claims the full quarter's promo but flags that the contract was not active for the whole period: **pro-rate or confirm the promo rule before quoting it to a supplier.** Excluding it, high-confidence missed money is **€2,628** (Riverside €1,080 + Northgate €1,548). This is the honest read — the agent surfaces *and qualifies* the number rather than overstating it.
 
 ---
 

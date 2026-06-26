@@ -149,8 +149,8 @@ Mapped to the SPEC §5 tool surface. **R** = read, **W** = write.
 
 ## 4. Files to upload (read-only inputs)
 
-All five CSVs + the PDF are read-only data-room inputs. (On-disk filename is `good_receipts.csv`;
-SPEC/HANDOFF prose refers to it as `goods_receipts` — upload the actual file below.)
+All five CSVs + the PDF are read-only data-room inputs. (On-disk filename is `good_receipts.csv` —
+the actual file, listed below; some prose elsewhere abbreviates it as `goods_receipts`.)
 
 | File (path) | Role |
 |---|---|

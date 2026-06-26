@@ -31,9 +31,11 @@ This is the output the AOP produces — cross-checked against the existing track
 | 9 | Sweet Treats short delivery | — | CLM-005 | **Unprovable** — no GRN |
 | 10 | Greenfield tomato price query | 0 | CLM-008 | No claim (INV = PO) |
 
-**Headline:** manual process logged ~€1,575 of genuine claims (and €450 of double-count + several
-phantom rows). The agent additionally surfaces **~€4,628 in missed recoverable** (damaged + rebate +
-promo) — money that was being left on the table exactly as Jenny predicted.
+**Headline:** the manual process logged €1,125 of genuine, correctly-stated claims (Greenfield €375 +
+Sunrise €750), plus a real €450 overcharge it logged **twice** (CLM-004 + CLM-006 — €450 of over-claim
+risk), and several blank/phantom rows. The agent additionally surfaces **~€4,628 in missed recoverable**
+(damaged + rebate + promo) — money left on the table exactly as Jenny predicted. (Roll-up: €6,203 owed ·
+€1,125 logged-correct · €450 over-claimed · €4,628 missed — the canonical engine bucketing.)
 
 ### The three traps the agent has to get right
 
