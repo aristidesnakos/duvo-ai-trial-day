@@ -1,0 +1,24 @@
+po_id,supplier_id,supplier_name,order_date,sku,description,uom,qty_ordered,unit_price_eur,po_total_eur
+PO-1001,SUP-001,Northgate Mills Ltd,2026-01-08,FLR-001,Wheat flour T530 25kg,case,2000,12.00,24000.00
+PO-1002,SUP-002,Greenfield Farm,2026-01-10,VEG-014,Tomatoes loose,kg,1000,2.50,2500.00
+PO-1003,SUP-003,Meadowvale Dairy Ltd,2026-01-12,DRY-101,Whole milk 1L,case,500,18.00,9000.00
+PO-1004,SUP-004,Sunrise Bakery,2026-01-15,BAK-220,Kaiser rolls,unit,5000,0.80,4000.00
+PO-1005,SUP-005,Riverside Beverages,2026-01-18,BEV-330,Sparkling water 1.5L,case,2000,9.00,18000.00
+PO-1006,SUP-006,Prime Cuts Butchers,2026-01-20,MEA-410,Chicken breast 1kg,kg,1500,6.50,9750.00
+PO-1007,SUP-007,Sweet Treats Co,2026-01-22,CON-510,Gummy bears 100g,unit,8000,0.45,3600.00
+PO-1008,SUP-008,EcoPack Ltd,2026-01-24,PKG-600,Paper bags L,case,1000,15.00,15000.00
+PO-1009,SUP-002,Greenfield Farm,2026-01-28,VEG-018,Cucumbers,kg,800,1.80,1440.00
+PO-1010,SUP-003,Meadowvale Dairy Ltd,2026-02-02,DRY-105,Butter 250g,case,600,22.00,13200.00
+PO-1011,SUP-005,Riverside Beverages,2026-02-05,BEV-335,Orange juice 1L,case,1200,11.00,13200.00
+PO-1012,SUP-006,Prime Cuts Butchers,2026-02-08,MEA-415,Pork loin 1kg,kg,1000,7.20,7200.00
+PO-1013,SUP-008,EcoPack Ltd,2026-02-10,PKG-605,Cling film rolls,case,400,18.00,7200.00
+PO-1014,SUP-001,Northgate Mills Ltd,2026-02-12,FLR-001,Wheat flour T530 25kg,case,1500,12.00,18000.00
+PO-1015,SUP-004,Sunrise Bakery,2026-02-15,BAK-225,Croissants,unit,4000,0.55,2200.00
+PO-1016,SUP-007,Sweet Treats Co,2026-02-18,CON-515,Chocolate bar 50g,unit,6000,0.60,3600.00
+PO-1017,SUP-002,Greenfield Farm,2026-02-22,VEG-014,Tomatoes loose,kg,1200,2.50,3000.00
+PO-1018,SUP-003,Meadowvale Dairy Ltd,2026-02-25,DRY-101,Whole milk 1L,case,500,18.00,9000.00
+PO-1019,SUP-005,Riverside Beverages,2026-03-01,BEV-330,Sparkling water 1.5L,case,1800,9.00,16200.00
+PO-1020,SUP-006,Prime Cuts Butchers,2026-03-04,MEA-410,Chicken breast 1kg,kg,1400,6.50,9100.00
+PO-1021,SUP-008,EcoPack Ltd,2026-03-08,PKG-600,Paper bags L,case,900,15.00,13500.00
+PO-1022,SUP-001,Northgate Mills Ltd,2026-03-12,FLR-001,Wheat flour T530 25kg,case,800,12.00,9600.00
+PO-1023,SUP-004,Sunrise Bakery,2026-03-15,BAK-220,Kaiser rolls,unit,5000,0.80,4000.00

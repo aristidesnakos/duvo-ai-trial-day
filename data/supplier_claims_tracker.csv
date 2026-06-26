@@ -1,0 +1,9 @@
+claim_id,date_logged,supplier,invoice_ref,po_ref,claim_type,claim_amount_eur,status,owner,notes
+CLM-001,2026-01-15,Greenfield Farm,INV-2002,PO-1002,Short delivery,375,Open,Jenny W.,150kg short per GRN-3002
+CLM-002,2026-01-21,Sunrise Bakery,INV-2004,PO-1004,Price discrepancy,750,in progress,Jenny W.,billed 0.95 vs agreed 0.80
+CLM-003,25/01/2026,Meadowvale Dairy,INV-2003,PO-1003,Price discrepancy,,WIP,Jenny W.,numbers look off units vs cases?? need to check w supplier
+CLM-004,2026-01-26,Prime Cuts Butchers,INV-2006,PO-1006,Overcharge,450,Open,Jenny W.,0.30/kg over pricelist on chicken
+CLM-005,2026-02-02,Sweet Treats Co,,PO-1007,Short delivery?,,Pending,Jenny W.,supplier says delivered full - we cant find the GRN. Tom looking into it?
+CLM-006,2026-02-10,Prime Cuts butchers,INV-2006,,Overcharge,450,open,M. Shaw,pork/chicken overcharge - chase supplier
+CLM-007,2025-12-20,Riverside Beverages,INV-2099,,Damaged goods,600,Paid,Jenny W.,Q4 claim settled - credited 18/12
+CLM-008,2026-02-18,Greenfield Farm,,,Price query,,open,Jenny W.,Paula asked about tomato pricing - not sure if claim, leaving here for now

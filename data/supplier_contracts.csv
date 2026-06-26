@@ -1,0 +1,9 @@
+supplier_id,supplier_name,contract_start,contract_end,payment_terms_days,volume_bonus_threshold_eur_qtr,volume_bonus_pct,promo_funding_eur_qtr,notes
+SUP-001,Northgate Mills Ltd,2025-01-01,2026-12-31,30,50000,3.0,0,"Quarterly volume rebate on cumulative net spend >= EUR 50,000 per quarter"
+SUP-002,Greenfield Farm,2025-06-01,2026-05-31,14,0,0.0,0,"Fresh produce. Short or damaged deliveries credited against GRN evidence"
+SUP-003,Meadowvale Dairy Ltd,2025-01-01,2026-12-31,30,80000,2.0,0,"Quarterly volume rebate on cumulative net spend >= EUR 80,000 per quarter. Prices quoted per case (12 units/case)"
+SUP-004,Sunrise Bakery,2025-03-01,2026-02-28,30,0,0.0,2000,"EUR 2,000 per quarter promo co-funding. Prices fixed per agreed pricelist"
+SUP-005,Riverside Beverages,2025-01-01,2026-12-31,45,50000,2.5,0,"Quarterly volume rebate on cumulative net spend >= EUR 50,000 per quarter"
+SUP-006,Prime Cuts Butchers,2025-01-01,2026-12-31,30,0,0.0,0,"Prices per agreed pricelist. Chicken breast EUR 6.50/kg, pork loin EUR 7.20/kg"
+SUP-007,Sweet Treats Co,2025-01-01,2026-12-31,30,0,0.0,0,"Confectionery. Standard terms"
+SUP-008,EcoPack Ltd,2025-01-01,2026-12-31,30,60000,2.0,0,"Quarterly volume rebate on cumulative net spend >= EUR 60,000 per quarter"
