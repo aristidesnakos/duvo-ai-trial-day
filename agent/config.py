@@ -58,9 +58,32 @@ def units_per_case_from_note(note: str) -> int:
 
 
 def first_int(text: str):
-    """First integer in a free-text note, e.g. damage qty from GRN notes."""
+    """First integer in a free-text note (fallback only)."""
     m = re.search(r"\d+", text or "")
     return int(m.group(0)) if m else None
+
+
+def damage_qty_from_note(note: str, uom: str):
+    """Extract a damaged quantity from GRN free text, ANCHORED to context.
+
+    Returns (qty, confidence). A bare first-integer grab is dangerous — a note
+    like "delivered 2026, 120 damaged" would yield 2026. So we prefer a number
+    bound to the unit token (e.g. "120 cases") or to a damage keyword, and only
+    fall back to the first integer at LOW confidence so the caller can flag it.
+    """
+    if not note:
+        return None, "low"
+    # 1) number immediately followed by the GRN's unit (e.g. "120 cases").
+    m = re.search(rf"(\d+)\s*{re.escape(uom)}s?\b", note, re.IGNORECASE)
+    if m:
+        return int(m.group(1)), "high"
+    # 2) number adjacent to a damage keyword.
+    m = re.search(r"(\d+)[^\d]{0,12}(?:leak|crush|damag|broken|spoil|smash)",
+                  note, re.IGNORECASE)
+    if m:
+        return int(m.group(1)), "medium"
+    n = first_int(note)
+    return (n, "low") if n is not None else (None, "low")
 
 
 def eur(x: float) -> str:

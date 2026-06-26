@@ -29,14 +29,18 @@ def normalize_uom(qty: float, unit_price: float, uom: str, units_per_case: int):
     return qty, unit_price, f"{qty:g} {uom} @ {config.eur(unit_price)}"
 
 
-def _grn_for(po_id: str, grns) -> Optional[object]:
-    matches = [g for g in grns if g.po_id == po_id]
-    return matches[0] if matches else None
+def _grns_for(po_id: str, grns) -> list:
+    return [g for g in grns if g.po_id == po_id]
 
 
-def _invoice_for(po_id: str, invoices) -> Optional[object]:
-    matches = [i for i in invoices if i.po_id == po_id]
-    return matches[0] if matches else None
+def _invoices_for(po_id: str, invoices) -> list:
+    return [i for i in invoices if i.po_id == po_id]
+
+
+def _weaker(*confidences) -> str:
+    """Return the weakest confidence among the inputs (low < medium < high)."""
+    rank = {"low": 0, "medium": 1, "high": 2}
+    return min(confidences, key=lambda c: rank.get(c, 0))
 
 
 def three_way_match(data: PeriodData) -> List[DerivedClaim]:
@@ -47,38 +51,58 @@ def three_way_match(data: PeriodData) -> List[DerivedClaim]:
     for po in data.purchase_orders:
         contract = contracts.get(po.supplier_id)
         upc = contract.units_per_case if contract else 1
-        grn = _grn_for(po.po_id, data.goods_receipts)
-        inv = _invoice_for(po.po_id, data.invoices)
+        grns_matched = _grns_for(po.po_id, data.goods_receipts)
+        invs_matched = _invoices_for(po.po_id, data.invoices)
 
         # Missing GRN => cannot substantiate receipt; never fabricate a claim.
-        if grn is None:
+        if not grns_matched:
+            inv_id = invs_matched[0].invoice_id if invs_matched else None
             claims.append(DerivedClaim(
                 po_id=po.po_id, supplier_id=po.supplier_id, supplier_name=po.supplier_name,
                 claim_type="no_evidence", eur_amount=0.0,
                 line_math=f"No goods-receipt row exists for {po.po_id}; receipt unverifiable — not claimable.",
-                evidence={"po": po.po_id, "grn": None, "invoice": inv.invoice_id if inv else None},
+                evidence={"po": po.po_id, "grn": None, "invoice": inv_id},
                 uom_normalized=False, confidence="high", period=data.period,
             ))
             continue
 
-        # Normalize PO, GRN, Invoice to base units.
-        po_qty, po_price, po_note = normalize_uom(po.qty_ordered, po.unit_price_eur, po.uom, upc)
-        grn_qty, _, _ = normalize_uom(grn.qty_received, 0.0, grn.uom, upc)
-        normalized = (po.uom.lower() == "case" and upc > 1)
+        # Multiple GRNs/invoices per PO (partial deliveries) => aggregate qty and
+        # lower confidence rather than silently using only the first row.
+        multi = len(grns_matched) > 1 or len(invs_matched) > 1
+        base_conf = "medium" if multi else "high"
 
-        if inv is not None:
-            inv_qty, inv_price, inv_note = normalize_uom(
-                inv.qty_invoiced, inv.unit_price_eur, inv.uom, upc)
+        # PO ordered outside its contract window => terms may not apply; flag it.
+        c_start = config.parse_date(contract.contract_start) if contract else None
+        c_end = config.parse_date(contract.contract_end) if contract else None
+        po_date = config.parse_date(po.order_date)
+        out_of_contract = (po_date is not None and
+                           ((c_start and po_date < c_start) or (c_end and po_date > c_end)))
+        if out_of_contract:
+            base_conf = _weaker(base_conf, "medium")
+        contract_caveat = (f" ⚠ PO ordered {po.order_date} outside contract window "
+                           f"{contract.contract_start}→{contract.contract_end}") if out_of_contract else ""
+
+        grn = grns_matched[0]  # representative row for condition/notes
+        normalized = (po.uom.lower() == "case" and upc > 1)
+        po_qty, po_price, po_note = normalize_uom(po.qty_ordered, po.unit_price_eur, po.uom, upc)
+        grn_qty = sum(normalize_uom(g.qty_received, 0.0, g.uom, upc)[0] for g in grns_matched)
+
+        if invs_matched:
+            inv = invs_matched[0]  # representative for unit price
+            inv_qty = sum(normalize_uom(i.qty_invoiced, 0.0, i.uom, upc)[0] for i in invs_matched)
+            _, inv_price, inv_note = normalize_uom(inv.qty_invoiced, inv.unit_price_eur, inv.uom, upc)
         else:
+            inv = None
             inv_qty = inv_price = 0.0
             inv_note = "no invoice"
 
         evidence = {
             "po": {"po_id": po.po_id, "qty": po.qty_ordered, "uom": po.uom,
                    "unit_price_eur": po.unit_price_eur, "normalized": po_note},
-            "grn": {"grn_id": grn.grn_id, "qty_received": grn.qty_received,
+            "grn": {"grn_ids": [g.grn_id for g in grns_matched], "qty_received_total": grn_qty,
                     "condition": grn.condition, "notes": grn.notes},
-            "invoice": ({"invoice_id": inv.invoice_id, "qty": inv.qty_invoiced, "uom": inv.uom,
+            "invoice": ({"invoice_ids": [i.invoice_id for i in invs_matched],
+                         "invoice_id": inv.invoice_id, "qty_total": inv_qty, "uom": inv.uom,
                          "unit_price_eur": inv.unit_price_eur, "normalized": inv_note}
                         if inv else None),
         }
@@ -94,23 +118,24 @@ def three_way_match(data: PeriodData) -> List[DerivedClaim]:
                 claim_type="short_delivery", eur_amount=round(amount, 2),
                 line_math=(f"Invoiced {inv_qty:g} {disp} but GRN received {grn_qty:g} "
                            f"({grn.notes or 'short'}); billed for {short_units:g} undelivered "
-                           f"× {config.eur(po_price)} = {config.eur(amount)}"),
-                evidence=evidence, uom_normalized=normalized, confidence="high", period=data.period,
+                           f"× {config.eur(po_price)} = {config.eur(amount)}{contract_caveat}"),
+                evidence=evidence, uom_normalized=normalized, confidence=base_conf, period=data.period,
             ))
 
-        # --- Damage: GRN flagged Damaged with a quantity in notes. ---
+        # --- Damage: GRN flagged Damaged with a quantity ANCHORED in the notes. ---
         if grn.condition.strip().lower() == "damaged":
-            dmg_units_raw = config.first_int(grn.notes)
-            if dmg_units_raw:
+            dmg_qty, dmg_conf = config.damage_qty_from_note(grn.notes, grn.uom)
+            if dmg_qty:
                 # Damage qty is stated in the GRN's own uom; price in same uom.
-                amount = dmg_units_raw * po.unit_price_eur
+                amount = dmg_qty * po.unit_price_eur
                 claims.append(DerivedClaim(
                     po_id=po.po_id, supplier_id=po.supplier_id, supplier_name=po.supplier_name,
                     claim_type="damage", eur_amount=round(amount, 2),
-                    line_math=(f"GRN condition Damaged: {dmg_units_raw} {grn.uom} "
+                    line_math=(f"GRN condition Damaged: {dmg_qty} {grn.uom} "
                                f"({grn.notes}) × {config.eur(po.unit_price_eur)}/{grn.uom} "
-                               f"= {config.eur(amount)}"),
-                    evidence=evidence, uom_normalized=normalized, confidence="high", period=data.period,
+                               f"= {config.eur(amount)}{contract_caveat}"),
+                    evidence=evidence, uom_normalized=normalized,
+                    confidence=_weaker(base_conf, dmg_conf), period=data.period,
                 ))
 
         # --- Price gap: invoice unit price above agreed (PO/contract) price. ---
@@ -121,8 +146,8 @@ def three_way_match(data: PeriodData) -> List[DerivedClaim]:
                 claim_type="price_gap", eur_amount=round(amount, 2),
                 line_math=(f"Invoice {config.eur(inv_price)}/{disp} vs agreed {config.eur(po_price)}/{disp} "
                            f"= {config.eur(inv_price - po_price)} × {inv_qty:g} {disp} invoiced "
-                           f"= {config.eur(amount)}"),
-                evidence=evidence, uom_normalized=normalized, confidence="high", period=data.period,
+                           f"= {config.eur(amount)}{contract_caveat}"),
+                evidence=evidence, uom_normalized=normalized, confidence=base_conf, period=data.period,
             ))
 
     return claims

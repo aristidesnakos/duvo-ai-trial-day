@@ -123,6 +123,24 @@ def test_submit_gated_without_approval(tmp_path=None):
     assert result["status"] == "BLOCKED_NEEDS_APPROVAL"
 
 
+def test_damage_extraction_is_anchored_not_first_int():
+    """Damage qty must bind to the unit/keyword, not grab a stray year/number."""
+    from agent.config import damage_qty_from_note
+    assert damage_qty_from_note("120 cases bottles leaking/crushed", "case") == (120, "high")
+    # The trap: a year appears before the real quantity — must NOT return 2026.
+    qty, conf = damage_qty_from_note("delivered 2026, 120 cases damaged", "case")
+    assert qty == 120, f"anchored parser grabbed {qty}, expected 120"
+    # No quantity stated → no fabricated number.
+    assert damage_qty_from_note("fully damaged, see photos", "case")[0] is None
+
+
+def test_riverside_damage_high_confidence():
+    """The €1,080 damage claim is high-confidence (qty anchored to '120 cases')."""
+    _, _, reconciled, _, _ = _setup()
+    r = _by_supplier(reconciled, "Riverside", "damage")[0]
+    assert r.claim.confidence == "high"
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     passed = 0

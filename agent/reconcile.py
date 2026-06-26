@@ -10,8 +10,10 @@ We also scan the tracker for orphan rows the data does NOT substantiate.
 """
 from __future__ import annotations
 
+from datetime import date
 from typing import List
 
+from . import config
 from .loader import PeriodData
 from .models import DerivedClaim, ReconciledClaim
 
@@ -82,6 +84,10 @@ def reconcile_against_tracker(derived: List[DerivedClaim],
                 claimable=True, not_claimable_reason=None))
             continue
 
+        # Stable primary: the earliest-logged row is the original; later rows are
+        # the duplicates. Independent of CSV row order (claim_id breaks ties).
+        matches = sorted(
+            matches, key=lambda m: (config.parse_date(m.date_logged) or date.max, m.claim_id))
         primary = matches[0]
         logged_total = sum(m.claim_amount_eur or 0.0 for m in matches)
         delta = round(claim.eur_amount - logged_total, 2)
