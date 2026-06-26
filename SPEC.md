@@ -98,16 +98,19 @@ Exact columns `[confirm on day]` against real CSVs. Target internal shapes:
 
 ## 8. Acceptance criteria (tests & demo script)
 
-- [ ] **Meadowvale Dairy (SUP-003) — missed / UoM (hero):** Given dairy lines quoted **per case (12 units)**, when matched with UoM normalized, then a **justified claim Jenny abandoned** is surfaced, bucketed **missed**, with the conversion shown in evidence. Without normalization the numbers don't reconcile (negative control).
-- [ ] **Greenfield Farm — short delivery, logged-correct:** Given tomatoes PO_qty − GR_qty = **150 kg** with a GRN and no credit note, then a justified short-delivery claim is produced and reconciles to the **open** tracker row (bucket **logged-correct**).
-- [ ] **Sunrise Bakery — price-gap, logged-correct:** Given invoice price > contract price on rolls, then a **price-gap claim ≈ €750** is produced and matches the **disputed** tracker row (bucket **logged-correct**); € matches within rounding.
-- [ ] **Prime Cuts Butchers — duplicate / over-claim:** Given a meat claim appearing **twice** in the tracker, then reconciliation flags **over-claimed** with `duplicate_of` set and does **not** raise a second claim.
-- [ ] **Sweet Treats — not-substantiable:** Given gummy-bear claim with **no/short GR (no evidence)**, then the agent returns **not-claimable** with reason and **raises no claim** (no fabrication).
-- [ ] **Rebate entitlement check:** For each rebate supplier (flour, drinks, packaging, dairy), given Q1 volume vs contract threshold, then earned-but-unclaimed **rebate €** is computed with basis shown; threshold-crossing cases bucketed **missed**.
-- [ ] **Mark's question answered:** Run produces **€ owed**, **€ recovered**, **recovery rate**, split missed/logged-correct/over-claimed, plus annualized run-rate.
-- [ ] **Idempotency:** re-run with same `(po_id, claim_type)` does not double-submit.
-- [ ] **Human gate:** `submit_claim` pauses for approval; nothing is written without it.
-- [ ] **Trace + audit:** every run leaves a `run_id`-joinable trace and per-claim audit record; no secrets logged.
+> **All 11 pass** as of the build — see `tests/test_acceptance.py` (11/11). Two prep assumptions were **overturned by the real data** and corrected below; both corrections make the story more defensible (we don't fabricate, and we show where money *isn't*).
+
+- [x] **Meadowvale Dairy (SUP-003) — UoM negative control (corrected):** Dairy is quoted **per case (12 units)**. Once UoM is normalized, INV-2003 (6,000 units @ €1.50) reconciles **exactly** to PO-1003 (500 cases @ €18.00) = €9,000 → **€0, NO claim**. The flagship is not "money found in dairy" (that would be fabrication) but **proving the claim Jenny abandoned doesn't exist**, while the per-case logic that defeated her is shown explicitly. *(Prep had assumed a missed dairy claim; the data says otherwise.)*
+- [x] **Greenfield Farm — short delivery, logged-correct:** PO_qty − GR_qty = **150 kg**; billed for 150 undelivered × €2.50 = **€375.00**; reconciles to **open** tracker row CLM-001 (bucket **logged-correct**).
+- [x] **Sunrise Bakery — price-gap, logged-correct:** rolls €0.95 vs €0.80 × 5,000 = **€750.00**; matches tracker CLM-002 (in progress → **logged-correct**).
+- [x] **Riverside Beverages — damage, MISSED:** GRN-3005 flags **120 damaged cases** × €9.00 = **€1,080.00**; **not in the tracker** → bucket **missed** (the largest single missed discrepancy).
+- [x] **Prime Cuts Butchers — duplicate / over-claim:** chicken €6.80 vs €6.50 × 1,500 = **€450.00**, real once but logged **twice** (CLM-004 + CLM-006) → bucket **over-claimed**, `duplicate_of=CLM-006`, over-claim risk €450; does **not** raise a second claim.
+- [x] **Sweet Treats — not-substantiable:** PO-1007 has **no GRN** → **not-claimable**, **no claim raised** (no fabrication).
+- [x] **Rebate entitlement check (corrected):** Of the four rebate suppliers (flour/drinks/packaging/dairy), **only Northgate flour crosses** its threshold (€51,600 ≥ €50,000 @ 3% = **€1,548.00**, MISSED); the other three are below (Riverside a €2,600 near-miss) → recorded transparently as €0, not raised. **Plus Sunrise promo €2,000/qtr** owed unconditionally (MISSED). *(Prep had assumed rebates were the big multi-supplier upside; only one qualifies.)*
+- [x] **Mark's question answered:** **€6,203 owed · €0 recovered · 0% recovery rate · €4,628 missed · €450 over-claim risk · €24,812 annualized.**
+- [x] **Idempotency:** re-submit with same `(po_id|claim_type)` key returns `ALREADY_SUBMITTED`, no second claim.
+- [x] **Human gate:** `submit_claim` returns `BLOCKED_NEEDS_APPROVAL` until a human approval is persisted; nothing is written without it.
+- [x] **Trace + audit:** every run emits a deterministic `run_id` and writes `out/<run_id>.trace.json` + `.audit.json`; no secrets logged.
 
 ## 9. Assumptions & mocks
 
@@ -136,3 +139,31 @@ Exact columns `[confirm on day]` against real CSVs. Target internal shapes:
 - All supplier pack/case sizes (UoM traps beyond SUP-003); how damage is coded; multiple GRs per PO.
 - Real claim-submission target + auth (to replace the stub) and who owns those secrets.
 - Agree the exact **€X owed / recovery-rate target** with Mark/Paula at the 10:30 scope check before building.
+
+## 12. Build plan & status (spec-driven-build)
+
+**Stack:** Python 3 (stdlib only — `csv`, `dataclasses`, `hashlib`, `json`, `argparse`); deterministic, dependency-free, runs on any machine. **Transparent arithmetic** (constitution §6): every € is re-checkable line-math, never opaque inference. Orchestration today is the **autonomous CLI runner** (`agent/run.py`); the Claude Agent SDK + MCP-server wrapper is the documented next step (the deterministic engine becomes the tool layer the SDK calls).
+
+**Module map (tool surface from §5 → code):**
+
+| SPEC tool | Module | Notes |
+|---|---|---|
+| `load_period_data` | `agent/loader.py` | validates columns, scopes to Q1, splits the Q4 row out |
+| `normalize_uom` | `agent/matcher.py` | reads pack size from the contract note (generic, not SUP-003-hardcoded) |
+| `three_way_match` | `agent/matcher.py` | short / damage / price-gap; missing-GRN → not-claimable |
+| `compute_entitlements` | `agent/entitlements.py` | rebate (only if threshold crossed) + promo |
+| `reconcile_against_tracker` | `agent/reconcile.py` | buckets + duplicate detection + orphan-row scan |
+| `build_claim_pack` / roll-up | `agent/claimpack.py` | per-claim pack + Mark's-question roll-up |
+| `submit_claim` (**the only write**) | `agent/submit.py` | human-gated, idempotent, capped, stubbed |
+| run_id + trace/audit | `agent/observability.py` | deterministic run_id; `out/<run_id>.*.json` |
+
+**Run it:**
+```
+python3 -m agent.run                 # full reconciliation report (read-only)
+python3 -m agent.run --json          # machine-readable roll-up + claim packs
+python3 -m agent.run --approve "SUP-001:Q1-2026|rebate" --approver "Mark Bryant"
+python3 -m agent.run --submit        # the only write; only fires for approved claims
+python3 tests/test_acceptance.py     # 11/11 acceptance criteria
+```
+
+**Status: MVP complete & green.** 11/11 acceptance criteria pass; the human-gated idempotent write was exercised end-to-end (blocked → approved → submitted → already-submitted). Engine numbers match the independent 4-stream verification exactly.

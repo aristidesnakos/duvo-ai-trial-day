@@ -1,0 +1,8 @@
+# Generated run artifacts (trace/audit + approval/submission state)
+out/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
