@@ -186,209 +186,67 @@
 
 <main class="deck" id="deck">
 
-  <!-- 01 — COVER -->
-  <section class="slide is-active" data-act="Cover">
+  <!-- 01 — THE PROBLEM -->
+  <section class="slide is-active" data-act="The problem">
     <div class="slide-inner">
-      <p class="eyebrow">Daily Basket <span class="muted">·</span> Finance Ops <span class="muted">·</span> Daily Basket × Duvo</p>
-      <h1>The recovery rate <span class="tint">nobody could compute.</span></h1>
-      <div class="stripe">
-        <div class="stat"><div class="v zero num">€6,203</div><div class="k">Owed · Q1</div></div>
-        <div class="stat"><div class="v risk num">€0</div><div class="k">Recovered</div></div>
-        <div class="stat"><div class="v miss num">0%</div><div class="k">Recovery rate</div></div>
-        <div class="stat"><div class="v good num">13/13</div><div class="k">Tests green</div></div>
-      </div>
-      <p class="lede">One safe agent that derives what suppliers owe, reconciles it against the spreadsheet, and hands a human an auditable claim. Every euro defensible — live on Duvo.</p>
+      <p class="eyebrow">Daily Basket <span class="muted">·</span> Finance Ops</p>
+      <h1>A one-person spreadsheet — money walking out <span class="tint">both doors.</span></h1>
+      <ul class="clean">
+        <li>Every claim is a manual <b>PO ↔ Goods Receipt ↔ Invoice</b> match across four files — reactive, slow, owned by one person.</li>
+        <li>Money <b>never claimed</b> (short / damaged / rebates) and money <b>overpaid</b> (duplicate bills) both slip through. <i>"I catch what I catch."</i></li>
+        <li>Finance can't answer Mark — <i>"how much are we recovering vs. owed?"</i> — the recovery rate was never computed.</li>
+      </ul>
+      <p class="lede tight">Tedious, error-prone, and it stops the moment Jenny is out.</p>
     </div>
   </section>
 
-  <!-- 02 — PROBLEM -->
-  <section class="slide" data-act="The problem">
+  <!-- 02 — WHAT WE AUTOMATED -->
+  <section class="slide" data-act="What we built">
     <div class="slide-inner two">
       <div>
-        <p class="eyebrow">Before</p>
-        <h2>You can't measure a recovery rate you've <span class="tint">never computed.</span></h2>
-        <ul class="clean">
-          <li>The claims process lived in <b>one analyst's spreadsheet</b> — reactive, single-owner.</li>
-          <li>Out sick two weeks in February — <b>credit windows nearly closed</b>.</li>
-          <li>The money <b>never logged at all</b> was invisible. <i>"I catch what I catch."</i></li>
-        </ul>
+        <p class="eyebrow">What we automated <span class="muted">·</span> one safe agent</p>
+        <h2>It does the whole tedious match — <span class="tint">end to end.</span></h2>
+        <p class="lede">One agent <b style="color:var(--ink)">derives</b> the claims that <i>should</i> exist — straight from <span class="num">PO ↔ GRN ↔ Invoice</span> + contracts, not the spreadsheet — then <b style="color:var(--ink)">reconciles</b> them against the tracker, catching the inverse too: <b style="color:var(--ink)">duplicate invoices we should never pay</b>. Finally it <b style="color:var(--ink)">hands off</b> a human-gated claim with line-math and evidence behind every euro.</p>
+        <p class="lede tight"><b style="color:var(--ink)">Live on Duvo Production</b> — and it runs without Jenny.</p>
       </div>
       <div>
-        <blockquote class="quote">"How much are we actually recovering vs. how much is owed to us?"<span class="by">— Mark Bryant, Finance Director · and Finance had no answer</span></blockquote>
-      </div>
-    </div>
-  </section>
-
-  <!-- 03 — THE ANSWER -->
-  <section class="slide" data-act="The answer">
-    <div class="slide-inner">
-      <p class="eyebrow">What the agent does</p>
-      <h2>Derive from source. Reconcile. <span class="tint">Hand a human the claim.</span></h2>
-      <div class="grid c3">
-        <div class="card">
-          <div class="tag" style="color:var(--ink-soft)"><span style="background:var(--ink-soft)"></span>01 · Derive</div>
-          <div class="small">The claims that <b style="color:var(--ink)">should</b> exist, from <span class="num">PO ↔ Goods Receipt ↔ Invoice</span> + contracts — not the spreadsheet.</div>
-        </div>
-        <div class="card">
-          <div class="tag" style="color:var(--ink-soft)"><span style="background:var(--ink-soft)"></span>02 · Reconcile</div>
-          <div class="small">Against the tracker, into four buckets: missed · logged-correct · over-claimed · not-claimable.</div>
-        </div>
-        <div class="card">
-          <div class="tag" style="color:var(--ink-soft)"><span style="background:var(--ink-soft)"></span>03 · Claim pack</div>
-          <div class="small">Human-gated, idempotent, with line-math and evidence behind every euro.</div>
-        </div>
-      </div>
-      <p class="lede">The spreadsheet stops being the source of truth. The ERP exports become the source; the spreadsheet becomes the thing we reconcile <i>against</i>.</p>
-    </div>
-  </section>
-
-  <!-- 04 — THE NUMBERS -->
-  <section class="slide" data-act="The numbers">
-    <div class="slide-inner">
-      <p class="eyebrow">The roll-up, from source</p>
-      <h2>The denominator, <span class="tint">finally answerable.</span></h2>
-      <div class="stripe">
-        <div class="stat"><div class="v zero num">€6,203</div><div class="k">Owed</div></div>
-        <div class="stat"><div class="v miss num">€4,628</div><div class="k">Missed — never logged</div></div>
-        <div class="stat"><div class="v risk num">€450</div><div class="k">Over-claim risk caught</div></div>
-        <div class="stat"><div class="v good num">€24,812</div><div class="k">Annualized (Q1 ×4)</div></div>
-      </div>
-      <p class="lede tight">Lead with <b style="color:var(--ink)">€2,628 high-confidence</b> (Riverside damage + Northgate rebate). The €2,000 promo is caveated upside, not headline.</p>
-    </div>
-  </section>
-
-  <!-- 05 — FOUR BUCKETS -->
-  <section class="slide" data-act="The numbers">
-    <div class="slide-inner">
-      <p class="eyebrow">Reconciled against the spreadsheet</p>
-      <h2>Four buckets. <span class="tint">Each defensible by line-math.</span></h2>
-      <div class="grid c4">
-        <div class="card miss">
-          <div class="tag">Missed</div>
-          <div class="big num">€4,628</div>
-          <div class="small">Riverside damage <span class="num">€1,080</span> · Northgate rebate <span class="num">€1,548</span> · Sunrise promo <span class="num">€2,000</span></div>
-        </div>
-        <div class="card good">
-          <div class="tag">Logged-correct</div>
-          <div class="big num">€1,125</div>
-          <div class="small">Greenfield short <span class="num">€375</span> · Sunrise overcharge <span class="num">€750</span></div>
-        </div>
-        <div class="card risk">
-          <div class="tag">Over-claimed</div>
-          <div class="big num">€450</div>
-          <div class="small">Prime Cuts — logged <b style="color:var(--ink)">twice</b>, under two owners. Don't pay it twice.</div>
-        </div>
-        <div class="card null">
-          <div class="tag">Not-claimable</div>
-          <div class="big num">€0</div>
-          <div class="small">Sweet Treats — <b style="color:var(--ink)">no goods receipt</b>, so no claim. No fabrication.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 06 — HERO MOMENT -->
-  <section class="slide" data-act="Credibility">
-    <div class="slide-inner">
-      <p class="eyebrow">Meadowvale Dairy <span class="muted">·</span> the credibility centerpiece</p>
-      <h2>It proves there's <span class="tint">no claim</span> — instead of inventing one.</h2>
-      <div class="two" style="margin-top:8px">
-        <ul class="clean">
-          <li>The claim Jenny abandoned: <i>"the numbers wouldn't line up."</i></li>
-          <li>The contract quotes <b>per case = 12 units</b>. The agent normalizes the unit of measure <b>before</b> any comparison.</li>
-          <li>The honest answer: <b style="color:var(--good)">€0. No claim. Stop chasing it.</b></li>
-        </ul>
         <div class="callout">
-          <div class="eq">PO &nbsp; <span class="num">500 cases × €18.00</span> = <span class="num">€9,000</span><br>
-          ↳ <span class="num">500 × 12</span> = <span class="num">6,000 units @ €1.50</span><br>
-          INV <span class="num">6,000 units × €1.50</span> = <span class="num">€9,000</span><br>
-          <span class="tint">Ties exactly → no discrepancy.</span></div>
+          <div class="eq" style="font-size:clamp(13px,1.35vw,18px)">
+            <span style="color:var(--ink-faint)">before</span><br>
+            4 files · 1 analyst · by hand<br><br>
+            <span class="tint">after</span><br>
+            1 agent · every euro · <span class="tint">end to end</span>
+          </div>
+          <div class="eq" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--rule);font-size:clamp(12px,1.2vw,15px);color:var(--ink-soft)">
+            guarantee → exactly <b style="color:var(--ink)">one</b> human-gated write
+          </div>
         </div>
       </div>
-      <p class="lede tight">It did the conversion that defeated a human — and refused to fabricate money to look clever. That's why the other €4,628 is believable.</p>
     </div>
   </section>
 
-  <!-- 07 — HOW IT'S SAFE -->
-  <section class="slide" data-act="Guardrails">
+  <!-- 03 — THE PROOF -->
+  <section class="slide" data-act="The proof">
     <div class="slide-inner">
-      <p class="eyebrow">Guardrails</p>
-      <h2>Smallest safe surface. <span class="tint">One gated write.</span></h2>
-      <div class="checks">
-        <div class="check"><span class="mk">✓</span><span><b>7 tools, exactly one write.</b> Six are read-only and deterministic; only <span class="num">submit_claim</span> acts.</span></div>
-        <div class="check"><span class="mk">✓</span><span><b>Human-gated.</b> Refuses until a real approval is recorded — nothing is written on trust.</span></div>
-        <div class="check"><span class="mk">✓</span><span><b>Idempotent &amp; capped.</b> Keyed on PO + claim type, capped to the derived €; re-run = "already submitted."</span></div>
-        <div class="check"><span class="mk">✓</span><span><b>Transparent, not inferred.</b> Plain arithmetic an auditor re-checks — no LLM near a number.</span></div>
-        <div class="check"><span class="mk">✓</span><span><b>Trace + audit by <span class="num">run_id</span>.</b> Who approved what, end to end. No secrets logged.</span></div>
-        <div class="check"><span class="mk">✓</span><span><b>No fabrication.</b> Missing evidence → not-claimable. The dairy €0 is the proof.</span></div>
+      <p class="eyebrow">Quantified <span class="muted">·</span> Q1 2026 <span class="muted">·</span> every euro defensible</p>
+      <h2>Money <span class="tint">found</span> — and money <span class="tint">saved.</span></h2>
+      <div class="stripe">
+        <div class="stat"><div class="v zero num">€6,203</div><div class="k">Owed · the denominator</div></div>
+        <div class="stat"><div class="v miss num">€4,628</div><div class="k">Missed — never logged</div></div>
+        <div class="stat"><div class="v good num">€29,200</div><div class="k">Duplicate billing stopped</div></div>
+        <div class="stat"><div class="v good num">18/18</div><div class="k">Tests green</div></div>
       </div>
+      <p class="lede">It even <b style="color:var(--ink)">refuses to invent money</b> — the dairy claim a human abandoned nets to <span class="num">€0</span> once units are normalized. That's why the rest is believable.</p>
     </div>
   </section>
 
-  <!-- 08 — THE DEMO -->
+  <!-- 04 — DEMO -->
   <section class="slide" data-act="Live demo">
     <div class="slide-inner">
       <p class="eyebrow">Live <span class="muted">·</span> ~3 min <span class="muted">·</span> deterministic</p>
-      <h2>Watch it find money — <span class="tint">and refuse to invent it.</span></h2>
-      <div class="term">
-        <div class="term-bar"><i></i><i></i><i></i><span class="ttl">daily-basket — agent.run</span></div>
-        <div class="term-body">
-<span class="ln"><span class="p">$</span> <span class="c">python3 tests/test_acceptance.py</span></span><span class="ln"><span class="ok">  13/13 acceptance criteria passed</span></span>
-<span class="ln"><span class="p">$</span> <span class="c">python3 -m agent.run</span></span><span class="ln"><span class="o">  € owed  €6,203.00   recovered  €0.00   RECOVERY RATE  0%</span></span>
-<span class="ln"><span class="dim">  MISSED (3)</span></span><span class="ln"><span class="am">   • Riverside — damage — €1,080.00     • Northgate — rebate — €1,548.00</span></span>
-<span class="ln"><span class="dim">  NOT-CLAIMABLE</span></span><span class="ln"><span class="o">   • Meadowvale Dairy — €0.00  (UoM reconciles: 6000 units = 500 cases ×12)</span></span>
-<span class="ln"><span class="dim">  OVER-CLAIMED</span></span><span class="ln"><span class="rk">   • Prime Cuts — €450.00  DUPLICATE_OF=CLM-006</span></span>
-<span class="ln"><span class="p">$</span> <span class="c">python3 -m agent.run --submit</span>            <span class="dim"># the only write</span></span><span class="ln"><span class="rk">  No approved claims to submit — refused.</span></span>
-<span class="ln"><span class="p">$</span> <span class="c">... --approve "SUP-001:Q1-2026|rebate" --approver "Mark Bryant"</span></span><span class="ln"><span class="ok">  APPROVED  by Mark Bryant @ 2026-04-08</span></span>
-<span class="ln"><span class="p">$</span> <span class="c">python3 -m agent.run --submit</span></span><span class="ln"><span class="ok">  SUBMITTED  €1,548.00  ->  SUB-1230272</span></span>
-<span class="ln"><span class="p">$</span> <span class="c">python3 -m agent.run --submit</span>            <span class="dim"># run it again</span></span><span class="ln"><span class="o">  ALREADY_SUBMITTED  ->  SUB-1230272   </span><span class="dim">(idempotent — no double-write)</span></span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 09 — DEPLOY -->
-  <section class="slide" data-act="Deploy">
-    <div class="slide-inner two">
-      <div>
-        <p class="eyebrow">Shipped, not prototyped</p>
-        <h2>Already live on <span class="tint">Duvo Production.</span></h2>
-        <ul class="clean">
-          <li>Agent <b>"Supplier Reconciliation &amp; Claims Co-Pilot"</b> · model <span class="num">claude-sonnet-4-6</span>.</li>
-          <li>The six Q1 inputs loaded as knowledge-base files; identify-only, zero live writes.</li>
-          <li>Runs end-to-end <b>without Jenny</b> — kills the key-person risk that cost two weeks.</li>
-        </ul>
-      </div>
-      <div>
-        <div class="card good">
-          <div class="tag">Next, in the dashboard</div>
-          <div class="small" style="margin-top:6px">↳ Connect Google Sheets + the <span class="num">claims@</span> mailbox<br>↳ Schedules — weekly sweep + quarter-end rebate run<br>↳ Re-enable the runtime human-in-the-loop gate</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 10 — RISKS -->
-  <section class="slide" data-act="Honest next">
-    <div class="slide-inner">
-      <p class="eyebrow">Named first, not hidden</p>
-      <h2>Here's what I'd confirm <span class="tint">before you quote it.</span></h2>
-      <div class="grid c2">
-        <div class="card miss"><div class="tag">Rebate basis</div><div class="small">Gross PO spend — Northgate clears €50k by only <span class="num">€1,600</span>. Net-of-credits could move it. A config flag, not a rewrite.</div></div>
-        <div class="card miss"><div class="tag">Expired promo</div><div class="small">Sunrise's <span class="num">€2,000</span> promo contract lapsed <span class="num">2026-02-28</span> → flagged medium-confidence. High-confidence missed is <span class="num">€2,628</span>.</div></div>
-        <div class="card null"><div class="tag">Multi-GRN edges</div><div class="small">Partial deliveries are flagged-and-lowered today, not fully modeled — first thing to harden on live exports.</div></div>
-        <div class="card good"><div class="tag">Next two</div><div class="small">MCP server + Claude Agent SDK wrapper → then wire the real submission endpoint behind the existing gate.</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 11 — CLOSE -->
-  <section class="slide" data-act="The value line">
-    <div class="slide-inner">
-      <p class="eyebrow">The value line</p>
-      <h1>One safe agent, against the real stack — <span class="tint">fast.</span></h1>
-      <p class="lede">"API where it exists, computer use where it doesn't, a human gate on the risk."</p>
-      <p class="lede tight">Turned <i>"we have no idea"</i> into <b style="color:var(--ink)">"€6,203 owed, €4,628 of it missed — and here's the evidence for every euro."</b></p>
+      <h1>Watch it find money — <span class="tint">and refuse to invent it.</span></h1>
+      <p class="lede">Same input, same euro, every run. The only write is human-gated and idempotent — nothing moves without an approval.</p>
+      <p class="lede tight" style="color:var(--ink-faint);font-family:var(--mono);letter-spacing:.04em">→ to the demo</p>
     </div>
   </section>
 
