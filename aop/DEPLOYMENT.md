@@ -15,14 +15,14 @@ the exact wiring, and the verified closed-loop result, so the deployment is repr
 | Resource | Value |
 |---|---|
 | Team | `Ari Nakos Trial Days` — `57220e7d-d3d4-45dd-8831-ae0b5c8f70dd` |
-| **Reconciliation agent** (plays Daily Basket / Jenny) | `eb165d7e-c8aa-43d3-84ff-055fbcc961e3` — live build `b3b95613-…` ("v3-sheets-bus") |
+| **Reconciliation agent** (plays Daily Basket / Jenny) | `eb165d7e-c8aa-43d3-84ff-055fbcc961e3` — live build `bb58ef3f-…` ("v4-duplicate-invoice"; adds duplicate-invoice + dangling-reference handling). The closed-loop run record below was captured on the predecessor build `b3b95613-…` ("v3-sheets-bus"). |
 | **Supplier Simulator** (plays the 8 suppliers) | `e6e3b6e5-0037-4f88-a774-18abaa52dc0b` — live build `4f05ff4d-…` ("v2-ledger-reasoning") |
 | Model | `claude-sonnet-4-6[1m]` · Agent Memory: enabled |
 | Connection | Google Sheets — `0542cc25-1dc9-447b-8471-401834d77677` ("Google Sheets - ari.nakos@duvo.ai"), scopes `spreadsheets`+`drive` |
 | Integration (slot) | `googlesheets` — `06974974-9122-452f-a2d1-4f23f8df50be` |
 | Workbook ("surrogate ERP") | spreadsheet `1GeJpvll8va5_KJE8BlbC8EBAwbdAmFoUZY15vJ9ya-g` — "Daily Basket - Surrogate ERP" |
 | Tabs | `PurchaseOrders · GoodReceipts · Invoices · Contracts` (source, read-only) · `ClaimsTracker` (grocer R/W) · `SupplierLedger` (supplier's private books, simulator-only) · `Correspondence` (shared message bus) |
-| AOPs | [`reconciliation-agent-v2.aop.txt`](./reconciliation-agent-v2.aop.txt) · [`supplier-simulator.aop.txt`](./supplier-simulator.aop.txt) · ledger data: [`supplier-ledger.md`](./supplier-ledger.md) |
+| AOPs | recon: [`reconciliation-agent.aop.md`](./reconciliation-agent.aop.md) · sim: [`supplier-simulator.aop.txt`](./supplier-simulator.aop.txt) · ledger data: [`supplier-ledger.md`](./supplier-ledger.md). The exact deployed AOP text is held in the live Duvo build (above). |
 
 ## How it was wired (reproducible)
 
@@ -37,7 +37,7 @@ duvo connections list --json                          # -> connection 0542cc25-.
 
 # 3. Create the reconciliation agent + attach/pin the Sheets connection to a revision
 duvo agents create --name "Supplier Reconciliation & Claims Co-Pilot" \
-  --input "$(cat aop/reconciliation-agent-v2.aop.txt)" --json     # -> agent eb165d7e-...
+  --input "$(cat aop/reconciliation-agent.aop.md)" --json         # -> agent eb165d7e-...
 duvo revisions create --agent eb165d7e-... --name v3-sheets-bus --config-file <config>.json
 duvo revision-integrations attach        --agent eb165d7e-... --revision <rev> --integration 06974974-...
 duvo revision-integrations connections pin 0542cc25-... --agent eb165d7e-... --revision <rev> --integration 06974974-...
