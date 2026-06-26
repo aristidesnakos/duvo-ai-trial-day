@@ -3,6 +3,11 @@
 Provisioned on Duvo (Production) via the `@duvoai/cli` (`duvo` v1.11.0). This records the live IDs,
 the exact wiring, and the verified closed-loop result, so the deployment is reproducible and auditable.
 
+> **"Sandbox" = the trial team `Ari Nakos Trial Days`, not a customer's production tenant.** The brief
+> says "ship on the Duvo sandbox"; here that is a dedicated trial team on the Duvo Production platform.
+> No real Daily Basket data, no real suppliers, no real email — the suppliers are `SupplierLedger` rows
+> and the ERP is a surrogate Google Sheet. Production-platform, sandbox-scope.
+
 > **Architecture note.** The working design is a **two-agent closed loop over a single Google Sheets
 > workbook** (the surrogate ERP). An earlier approach uploaded the CSVs as knowledge-base files
 > (`config.data.files`) — it is **superseded**: those files did not mount in the run sandbox, so the
