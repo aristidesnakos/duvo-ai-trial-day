@@ -17,15 +17,15 @@ Daily Basket (online grocer, ~€180M GMV) is owed money by suppliers — short/
 
 | System | Holds | API? | Auth model | Access today? |
 |---|---|---|---|---|
-| `purchase_orders.csv` (ERP) | agreed qty & price per PO | CSV export | n/a (file) | mock — file not yet provided |
-| `goods_receipts.csv` (ERP/GRN) | received qty + condition (damage code) | CSV export | n/a (file) | mock — file not yet provided |
-| `invoices.csv` (AP / supplier portal) | billed qty & price | CSV export | n/a (file) | mock — file not yet provided |
-| `supplier_contracts.csv` | contract prices, UoM/pack size, rebate thresholds, promo funding terms | CSV export | n/a (file) | mock — file not yet provided |
-| `supplier_claims_tracker.csv` | today's spreadsheet — **reconcile target, not source of truth** | CSV export | n/a (file) | mock — file not yet provided |
+| `purchase_orders.csv` (ERP) | agreed qty & price per PO | CSV export | n/a (file) | live — on disk, validated by loader |
+| `good_receipts.csv` (ERP/GRN) | received qty + condition (damage code) | CSV export | n/a (file) | live — on disk, validated by loader |
+| `invoices.csv` (AP / supplier portal) | billed qty & price | CSV export | n/a (file) | live — on disk, validated by loader |
+| `supplier_contracts.csv` | contract prices, UoM/pack size, rebate thresholds, promo funding terms | CSV export | n/a (file) | live — on disk, validated by loader |
+| `supplier_claims_tracker.csv` | today's spreadsheet — **reconcile target, not source of truth** | CSV export | n/a (file) | live — on disk, validated by loader |
 | `email_thread.pdf` | how claims are triggered/handed off; human-gate context | PDF (present) | n/a (file) | available |
 | Claim submission target (supplier credit-note / dispute) | the only write | `[confirm on day]` — assume stubbed | `[confirm on day]` | **stubbed (mock)** for demo |
 
-**System of record = ERP exports + contracts (READ).** Tracker = reconcile target (READ). All file schemas/columns are `[confirm on day]` against the real CSVs.
+**System of record = ERP exports + contracts (READ).** Tracker = reconcile target (READ). The five CSVs are present and the loader validates columns / fails loud on mismatch; on a real engagement, re-confirm schemas against the customer's own exports.
 
 ## 4. Scope
 
@@ -98,7 +98,7 @@ Exact columns `[confirm on day]` against real CSVs. Target internal shapes:
 
 ## 8. Acceptance criteria (tests & demo script)
 
-> **All 11 pass** as of the build — see `tests/test_acceptance.py` (11/11). Two prep assumptions were **overturned by the real data** and corrected below; both corrections make the story more defensible (we don't fabricate, and we show where money *isn't*).
+> **All 13 pass** as of the build — see `tests/test_acceptance.py` (13/13). Two prep assumptions were **overturned by the real data** and corrected below; both corrections make the story more defensible (we don't fabricate, and we show where money *isn't*).
 
 - [x] **Meadowvale Dairy (SUP-003) — UoM negative control (corrected):** Dairy is quoted **per case (12 units)**. Once UoM is normalized, INV-2003 (6,000 units @ €1.50) reconciles **exactly** to PO-1003 (500 cases @ €18.00) = €9,000 → **€0, NO claim**. The flagship is not "money found in dairy" (that would be fabrication) but **proving the claim Jenny abandoned doesn't exist**, while the per-case logic that defeated her is shown explicitly. *(Prep had assumed a missed dairy claim; the data says otherwise.)*
 - [x] **Greenfield Farm — short delivery, logged-correct:** PO_qty − GR_qty = **150 kg**; billed for 150 undelivered × €2.50 = **€375.00**; reconciles to **open** tracker row CLM-001 (bucket **logged-correct**).
@@ -114,7 +114,7 @@ Exact columns `[confirm on day]` against real CSVs. Target internal shapes:
 
 ## 9. Assumptions & mocks
 
-- **CSVs not yet provided** — schemas/columns/values assumed; `load_period_data` validates and fails loud on mismatch. `[confirm on day]`
+- **CSVs are live on disk** — `load_period_data` validates columns and fails loud on mismatch; on a real engagement re-confirm schemas against the customer's exports. `[confirm on day]`
 - **SUP-003 dairy = 12 units/case**; **assume other UoM traps exist** until proven otherwise (check pack/case size per supplier).
 - **`submit_claim` is stubbed** (returns deterministic mock `submission_id`); real endpoint/auth TBD. `[confirm on day]`
 - **Tracker statuses** (open/paid/disputed) and what "claimed"/"recovered" mean (cash landed vs logged) `[confirm on day]`.
@@ -163,7 +163,7 @@ python3 -m agent.run                 # full reconciliation report (read-only)
 python3 -m agent.run --json          # machine-readable roll-up + claim packs
 python3 -m agent.run --approve "SUP-001:Q1-2026|rebate" --approver "Mark Bryant"
 python3 -m agent.run --submit        # the only write; only fires for approved claims
-python3 tests/test_acceptance.py     # 11/11 acceptance criteria
+python3 tests/test_acceptance.py     # 13/13 acceptance criteria
 ```
 
-**Status: MVP complete & green.** 11/11 acceptance criteria pass; the human-gated idempotent write was exercised end-to-end (blocked → approved → submitted → already-submitted). Engine numbers match the independent 4-stream verification exactly.
+**Status: MVP complete & green.** 13/13 acceptance criteria pass; the human-gated idempotent write was exercised end-to-end (blocked → approved → submitted → already-submitted). Engine numbers match the independent 4-stream verification exactly.

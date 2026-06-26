@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "aop-writer": {
+      "source": "duvoai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/aop-writer/SKILL.md",
+      "computedHash": "aa92d040f6e113460732d809b40d1c70a2ad302964f2cd11d0f9fea24297e28b"
+    },
+    "duvo-cli": {
+      "source": "duvoai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/duvo-cli/SKILL.md",
+      "computedHash": "0ac634f6b532c9b2aebbb57b4d0cf1e99f1008d569795860546730a9c1438e06"
+    },
+    "run-debugger": {
+      "source": "duvoai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/run-debugger/SKILL.md",
+      "computedHash": "5e9e3fb0559a15a6bdf1f7ca17ae86b8fbcc9aef5ffb1bd0f95938b1c2c6f574"
+    },
+    "workflow-debugger": {
+      "source": "duvoai/skills",
+      "sourceType": "github",
+      "skillPath": "skills/workflow-debugger/SKILL.md",
+      "computedHash": "932839311f7376408f4140891370ef3e3512581efab9b221d64285323823c60a"
+    }
+  }
+}

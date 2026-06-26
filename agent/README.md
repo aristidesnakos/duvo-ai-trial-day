@@ -14,7 +14,7 @@ Source of truth for behaviour: [`../SPEC.md`](../SPEC.md). Operating rules:
 ```bash
 python3 -m agent.run                 # full reconciliation report (read-only)
 python3 -m agent.run --json          # machine-readable roll-up + claim packs
-python3 tests/test_acceptance.py     # 11/11 acceptance criteria (no deps)
+python3 tests/test_acceptance.py     # 13/13 acceptance criteria (no deps)
 ```
 
 The one write (`submit_claim`) is gated on a recorded human approval:

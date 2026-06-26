@@ -6,3 +6,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+
+# Installed Duvo skills (reproducible via skills-lock.json)
+.agents/
+
+# Local/personal Claude Code settings
+.claude/settings.local.json
+
+# Symlinks to installed skills (managed; see skills-lock.json)
+.claude/skills/

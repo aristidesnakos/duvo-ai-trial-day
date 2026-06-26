@@ -60,16 +60,35 @@ def compute_entitlements(data: PeriodData) -> List[DerivedClaim]:
                     uom_normalized=False, confidence="high", period=data.period,
                 ))
 
-        # --- Promo funding (owed per quarter regardless of spend) ---
+        # --- Promo funding (per-quarter co-funding stated in the contract) ---
+        # The contract must be active across the period for a full-quarter amount
+        # to be safely claimable. If it lapses or starts mid-period, the full €/qtr
+        # is an assumption (pro-rate or confirm), so we drop confidence and caveat
+        # the line-math rather than overstate certainty. (Reusable-asset §6.)
         if c.promo_funding_eur_qtr > 0:
+            c_start = config.parse_date(c.contract_start)
+            c_end = config.parse_date(c.contract_end)
+            lapses_early = c_end is not None and c_end < config.PERIOD_END
+            starts_late = c_start is not None and c_start > config.PERIOD_START
+            partial_period = lapses_early or starts_late
+            if partial_period:
+                confidence = "medium"
+                caveat = (f" — ⚠ contract active {c.contract_start}→{c.contract_end}, "
+                          f"NOT the full period ({config.PERIOD_LABEL}); full-quarter amount "
+                          f"assumed — pro-rate or confirm before quoting")
+            else:
+                confidence = "high"
+                caveat = ""
             claims.append(DerivedClaim(
                 po_id=None, supplier_id=c.supplier_id, supplier_name=c.supplier_name,
                 claim_type="promo", eur_amount=round(c.promo_funding_eur_qtr, 2),
                 line_math=(f"Contract promo co-funding {config.eur(c.promo_funding_eur_qtr)}/qtr "
-                           f"owed for {data.period} (unconditional per contract)"),
+                           f"for {data.period}{caveat}"),
                 evidence={"contract_note": c.notes,
-                          "promo_funding_eur_qtr": c.promo_funding_eur_qtr},
-                uom_normalized=False, confidence="high", period=data.period,
+                          "promo_funding_eur_qtr": c.promo_funding_eur_qtr,
+                          "contract_start": c.contract_start, "contract_end": c.contract_end,
+                          "contract_covers_full_period": not partial_period},
+                uom_normalized=False, confidence=confidence, period=data.period,
             ))
 
     return claims
