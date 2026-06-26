@@ -1,0 +1,1 @@
+Source: https://github.com/aristidesnakos/fde-field-kit.git @ 96b6f62 (2026-06-25)
