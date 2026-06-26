@@ -13,7 +13,7 @@ and auditable.
 | Live build / revision | **`27f142e4-9882-4f10-8596-e93d72f420c2`** ("v2-files-attached") — the 6 files are attached here so they land in the run sandbox. (Initial build `d928916c…` had `files: []` and the agent couldn't see the data.) |
 | Model | `claude-sonnet-4-6[1m]` · Agent Memory: enabled |
 | Knowledge-base files | `purchase_orders.csv`, `good_receipts.csv`, `invoices.csv`, `supplier_contracts.csv`, `supplier_claims_tracker.csv`, `email_thread.pdf` — attached via `config.data.files` (team-file IDs `<team>%2F<filename>`) |
-| AOP source | [`aop/aop-input.txt`](./aop-input.txt) (loaded into the build's system input) |
+| AOP source | [`aop/reconciliation-agent.aop.md`](./reconciliation-agent.aop.md) (the AOP loaded into the build's system input) |
 
 ## How it was provisioned (reproducible)
 
@@ -25,7 +25,7 @@ duvo team use 57220e7d-d3d4-45dd-8831-ae0b5c8f70dd
 # 2. Create the agent with the AOP
 duvo agents create \
   --name "Supplier Reconciliation & Claims Co-Pilot" \
-  --input "$(cat aop/aop-input.txt)" --json
+  --input "$(cat aop/reconciliation-agent.aop.md)" --json
 
 # 3. Upload the Q1 data as knowledge-base files (presigned PUT)
 for f in purchase_orders good_receipts invoices supplier_contracts supplier_claims_tracker; do

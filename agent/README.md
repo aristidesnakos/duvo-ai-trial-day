@@ -6,15 +6,14 @@ Deterministic, dependency-free Python agent for Daily Basket Finance Ops. It
 Director's question — *how much are we recovering vs. how much is owed?* — with a
 human-gated, auditable claim pack behind every euro.
 
-Source of truth for behaviour: [`../SPEC.md`](../SPEC.md). Operating rules:
-[`../runbook/CONSTITUTION.md`](../runbook/CONSTITUTION.md).
+Source of truth for behaviour: [`../SPEC.md`](../SPEC.md).
 
 ## Run it
 
 ```bash
 python3 -m agent.run                 # full reconciliation report (read-only)
 python3 -m agent.run --json          # machine-readable roll-up + claim packs
-python3 tests/test_acceptance.py     # 13/13 acceptance criteria (no deps)
+python3 tests/test_acceptance.py     # 18/18 acceptance criteria (no deps)
 ```
 
 The one write (`submit_claim`) is gated on a recorded human approval:

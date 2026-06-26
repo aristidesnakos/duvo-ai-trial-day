@@ -7,7 +7,7 @@
 
 **Daily Basket could not answer Mark's question — "how much are we recovering vs. how much is owed?" Now it can: €6,203 owed, €0 recovered, a 0% recovery rate, and €4,628 in missed money the old process never logged — plus a €450 double-count caught before it reached a supplier. And it works the other direction too: €29,200 of duplicate supplier billing blocked before AP paid it (prevent loss). Total money protected = €6,203 recoverable + €29,200 prevented.**
 
-> **Live on Duvo (Production).** This is no longer just a local engine — the agent is deployed and runnable on the Duvo platform: **"Supplier Reconciliation & Claims Co-Pilot"** (agent `eb165d7e-c8aa-43d3-84ff-055fbcc961e3`, build/rev 1 `d928916c-051b-4f2f-9792-b9a25fdb2760`, `claude-sonnet-4-6[1m]`, Agent Memory on). It was provisioned via `duvo agents create` with the AOP plus a knowledge-base upload of the 6 Q1 inputs (the 5 CSVs + `email_thread.pdf`), and reconciles the **same validated Q1 numbers below** (€6,203 owed · €0 recovered · €4,628 missed · €450 over-claim). Commands, live IDs and scope are in [`aop/DEPLOYMENT.md`](aop/DEPLOYMENT.md); the captured run output is in [`aop/run-result.md`](aop/run-result.md).
+> **Live on Duvo (Production) — and the full recovery loop actually ran.** This is no longer a local engine: it is a **two-agent closed loop on the Duvo platform**, driven by AOP alone over a Google Sheets surrogate ERP. The **Supplier Reconciliation & Claims Co-Pilot** (agent `eb165d7e-c8aa-43d3-84ff-055fbcc961e3`, `claude-sonnet-4-6[1m]`) reconciles the data and chases credits; a **Supplier Simulator** (agent `e6e3b6e5-0037-4f88-a774-18abaa52dc0b`) role-plays the 8 suppliers from their *own* private ledger, so credits and disputes emerge from conflicting data — not a script. Workbook: `1GeJpvll8va5_KJE8BlbC8EBAwbdAmFoUZY15vJ9ya-g`. **Verified live result: €6,203 owed → €5,536 recovered = 89.2% recovery** (see "Live Duvo closed-loop result" below). Setup/IDs in [`aop/DEPLOYMENT.md`](aop/DEPLOYMENT.md); design + gaps in [`aop/SIMULATION-DESIGN.md`](aop/SIMULATION-DESIGN.md).
 
 ---
 
@@ -43,6 +43,24 @@
 > **Annualized run-rate:** Q1 €6,203 × 4 ≈ **€24,812/yr** (seasonality caveat — Q1 only; rebate/promo recur quarterly, discrepancies vary. Confirm with Finance before quoting externally.)
 >
 > **One claim carries a caveat (medium confidence): the €2,000 Sunrise promo.** Its contract runs `2025-03-01 → 2026-02-28` — it lapses two-thirds into Q1. The agent claims the full quarter's promo but flags that the contract was not active for the whole period: **pro-rate or confirm the promo rule before quoting it to a supplier.** Excluding it, high-confidence missed money is **€2,628** (Riverside €1,080 + Northgate €1,548). This is the honest read — the agent surfaces *and qualifies* the number rather than overstating it.
+
+---
+
+## Live Duvo closed-loop result (verified from the sheet)
+
+The agent didn't just *identify* the €6,203 — it **ran the recovery loop end-to-end on Duvo** and took Daily Basket from **0% → 89.2% recovered**, with one human approval gate. Two agents, AOP only, no custom code; the supplier side reasoned from its own ledger (so the stall and the promo haircut are *data-driven*, not scripted). Read back live from the `ClaimsTracker` / `Correspondence` tabs:
+
+| Claim | Supplier | Owed € | Recovered € | How it resolved |
+|---|---|--:|--:|---|
+| CLM-001 | Greenfield Farm | 375 | 375 | credit_full — supplier's dispatch agreed 850 kg |
+| CLM-002 | Sunrise Bakery | 750 | 750 | **stalled, then conceded** after a follow-up |
+| CLM-004 | Prime Cuts Butchers | 450 | 450 | credit_full (first occurrence; duplicate refused) |
+| CLM-009 | Riverside Beverages | 1,080 | 1,080 | credit_full — 120 damaged cases, photos on file |
+| CLM-010 | Northgate Mills | 1,548 | 1,548 | credit_full — Q1 spend €51,600 > €50k |
+| CLM-011 | Sunrise Bakery (promo) | 2,000 | 1,333 | **credit_partial** — contract lapsed 2026-02-28 |
+| **Total** | | **€6,203** | **€5,536** | **89.2% recovery** |
+
+> **Gap = €667**, entirely the March portion of the Sunrise promo, which the supplier pro-rated on the (correct) grounds that contract SUP-004 expired 2026-02-28 — the agent accepted the contractually-supported position rather than over-claiming. Correctly **not** chased: the €450 duplicate (CLM-006 voided), the Meadowvale false positive (closed), and the unprovable Sweet Treats claim (closed, no GRN). Every recovery is backed by an evidence-cited supplier response in the `Correspondence` tab.
 
 ---
 

@@ -63,9 +63,8 @@ agent/      deterministic reconciliation engine (the shipped agent)
 aop/        Duvo-platform-native agent design (AOP + provisioning payload)
 data/       scenario CSVs + email thread (read-only inputs)
 prep/       discovery questions, strategy, reusable asset
-tests/      acceptance criteria (13/13 green)
+tests/      acceptance criteria (18/18 green)
 out/        per-run trace + audit records
-runbook/    the FDE Field Kit method this build follows
 ```
 
 ## Guardrails

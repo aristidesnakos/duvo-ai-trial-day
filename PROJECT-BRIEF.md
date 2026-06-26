@@ -32,7 +32,7 @@ Anchored on **Mark's actual question** (from the email thread): *"how much are w
 - **Run-rate:** annualized **€24,812** (Q1 × 4; seasonality caveat — confirm with Finance before quoting externally).
 - **Resilience:** the process **runs end-to-end without Jenny** (Feb showed credit windows nearly closed when she was out — real € at stake).
 
-> The € target is no longer a placeholder — it is the engine's verified output (`python3 -m agent.run`, 13/13 acceptance criteria). On the real day, validate the figure against live exports at the 10:30 scope check before committing it to Mark.
+> The € target is no longer a placeholder — it is the engine's verified output (`python3 -m agent.run`, 18/18 acceptance criteria). On the real day, validate the figure against live exports at the 10:30 scope check before committing it to Mark.
 
 ## Non-goals
 

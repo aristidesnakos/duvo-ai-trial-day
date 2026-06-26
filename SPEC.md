@@ -98,7 +98,7 @@ Exact columns `[confirm on day]` against real CSVs. Target internal shapes:
 
 ## 8. Acceptance criteria (tests & demo script)
 
-> **All 13 pass** as of the build — see `tests/test_acceptance.py` (13/13). Two prep assumptions were **overturned by the real data** and corrected below; both corrections make the story more defensible (we don't fabricate, and we show where money *isn't*).
+> **All 13 pass** as of the build — see `tests/test_acceptance.py` (18/18). Two prep assumptions were **overturned by the real data** and corrected below; both corrections make the story more defensible (we don't fabricate, and we show where money *isn't*).
 
 - [x] **Meadowvale Dairy (SUP-003) — UoM negative control (corrected):** Dairy is quoted **per case (12 units)**. Once UoM is normalized, INV-2003 (6,000 units @ €1.50) reconciles **exactly** to PO-1003 (500 cases @ €18.00) = €9,000 → **€0, NO claim**. The flagship is not "money found in dairy" (that would be fabrication) but **proving the claim Jenny abandoned doesn't exist**, while the per-case logic that defeated her is shown explicitly. *(Prep had assumed a missed dairy claim; the data says otherwise.)*
 - [x] **Greenfield Farm — short delivery, logged-correct:** PO_qty − GR_qty = **150 kg**; billed for 150 undelivered × €2.50 = **€375.00**; reconciles to **open** tracker row CLM-001 (bucket **logged-correct**).
@@ -163,7 +163,7 @@ python3 -m agent.run                 # full reconciliation report (read-only)
 python3 -m agent.run --json          # machine-readable roll-up + claim packs
 python3 -m agent.run --approve "SUP-001:Q1-2026|rebate" --approver "Mark Bryant"
 python3 -m agent.run --submit        # the only write; only fires for approved claims
-python3 tests/test_acceptance.py     # 13/13 acceptance criteria
+python3 tests/test_acceptance.py     # 18/18 acceptance criteria
 ```
 
-**Status: MVP complete & green.** 13/13 acceptance criteria pass; the human-gated idempotent write was exercised end-to-end (blocked → approved → submitted → already-submitted). Engine numbers match the independent 4-stream verification exactly.
+**Status: MVP complete & green.** 18/18 acceptance criteria pass; the human-gated idempotent write was exercised end-to-end (blocked → approved → submitted → already-submitted). Engine numbers match the independent 4-stream verification exactly.
