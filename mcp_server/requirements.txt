@@ -1,0 +1,6 @@
+# Only the MCP server wrapper needs a dependency. The reconciliation engine
+# under agent/ stays pure stdlib (Python 3.7+) and is imported, never modified.
+#
+# The official Python MCP SDK ships FastMCP (`from mcp.server.fastmcp import FastMCP`)
+# and the Streamable HTTP transport that Duvo requires.
+mcp>=1.2.0
