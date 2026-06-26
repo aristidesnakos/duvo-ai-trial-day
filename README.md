@@ -27,7 +27,7 @@ It is built to be trusted by a Finance Director: every € is transparent line-m
 ```bash
 python3 -m agent.run                 # full reconciliation report (read-only)
 python3 -m agent.run --json          # machine-readable roll-up + claim packs
-python3 tests/test_acceptance.py     # 13/13 acceptance criteria
+python3 tests/test_acceptance.py     # 18/18 acceptance criteria
 
 # the only write — human-gated, idempotent, value-capped, stubbed for demo:
 python3 -m agent.run --approve "SUP-001:Q1-2026|rebate" --approver "Mark Bryant"
